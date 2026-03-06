@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place-it-R1: Unlocking Environment-aware Reasoning Potential of MLLM for Video Object Insertion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root{--bg:#0a0a0f;--bg-card:#12121a;--bg-card-hover:#1a1a28;--text:#e8e6e3;--text-dim:#8a8a9a;--text-muted:#555566;--accent:#6c8aff;--accent-glow:rgba(108,138,255,.15);--accent2:#a78bfa;--accent3:#34d399;--border:rgba(255,255,255,.06);--border-accent:rgba(108,138,255,.2);--radius:16px;--radius-sm:8px;--max-width:1100px;--font-body:'DM Sans',-apple-system,sans-serif;--font-display:'Instrument Serif',Georgia,serif;--font-mono:'JetBrains Mono',monospace}
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+        body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+        .ambient-bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+        .ambient-bg::before{content:'';position:absolute;width:800px;height:800px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(108,138,255,.08) 0%,transparent 70%);animation:drift1 20s ease-in-out infinite}
+        .ambient-bg::after{content:'';position:absolute;width:600px;height:600px;bottom:-100px;right:-200px;background:radial-gradient(circle,rgba(167,139,250,.06) 0%,transparent 70%);animation:drift2 25s ease-in-out infinite}
+        @keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(100px,80px)}}
+        @keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-80px,-60px)}}
+        nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px) saturate(1.5);-webkit-backdrop-filter:blur(20px) saturate(1.5);background:rgba(10,10,15,.7);border-bottom:1px solid var(--border);transition:transform .3s}
+        nav .nav-inner{max-width:var(--max-width);margin:0 auto;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+        nav .nav-title{font-family:var(--font-display);font-size:1.2rem;color:var(--text);text-decoration:none}
+        nav .nav-links{display:flex;gap:1.5rem}
+        nav .nav-links a{color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:500;letter-spacing:.02em;transition:color .2s}
+        nav .nav-links a:hover{color:var(--accent)}
+        .container{max-width:var(--max-width);margin:0 auto;padding:0 2rem}
+        section{padding:5rem 0;position:relative}
+        .reveal{opacity:0;transform:translateY(30px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+        .reveal.visible{opacity:1;transform:translateY(0)}
+        .reveal-delay-1{transition-delay:.1s}.reveal-delay-2{transition-delay:.2s}.reveal-delay-3{transition-delay:.3s}
+        .hero{text-align:center}
+        .hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;background:var(--accent-glow);border:1px solid var(--border-accent);border-radius:100px;font-size:.8rem;font-weight:600;color:var(--accent);letter-spacing:.04em;text-transform:uppercase;margin-bottom:2rem}
+        .hero-badge .dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse-dot 2s ease-in-out infinite}
+        @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+        .hero h1{font-family:var(--font-display);font-size:clamp(2.2rem,5vw,3.6rem);font-weight:400;line-height:1.18;letter-spacing:-.02em;max-width:950px;margin:0 auto 1.5rem}
+        .hero h1 em{font-style:italic;color:var(--accent)}
+        .hero .subtitle{font-size:1.05rem;color:var(--text-dim);max-width:700px;margin:0 auto 2.5rem;line-height:1.8}
+        .link-buttons{display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;margin-bottom:2.5rem}
+        .link-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.3rem;background:var(--bg-card);border:1px solid var(--border);border-radius:100px;color:var(--text);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .25s}
+        .link-btn:hover{background:var(--bg-card-hover);border-color:var(--border-accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,138,255,.08)}
+        .link-btn i,.link-btn .ai{font-size:1rem;color:var(--accent)}
+        .authors-section{text-align:center}
+        .authors-list{display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem 1.5rem;margin-bottom:1rem;max-width:800px;margin-left:auto;margin-right:auto}
+        .author{font-size:.95rem;color:var(--text)}.author a{color:var(--text);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
+        .author a:hover{border-bottom-color:var(--accent)}.author sup{color:var(--accent);font-size:.7rem;font-weight:600}
+        .author-note{font-size:.75rem;color:var(--text-dim)}
+        .affiliations{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem 2rem;color:var(--text-dim);font-size:.88rem}
+        .affiliations span sup{color:var(--accent);font-weight:600;margin-right:.2rem}
+        .teaser-wrap{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);background:var(--bg-card);margin-top:2.5rem}
+        .teaser-wrap video,.teaser-wrap img{width:100%;display:block}
+        .teaser-caption{padding:1rem 1.5rem;font-size:.85rem;color:var(--text-dim);border-top:1px solid var(--border);text-align:center}
+        .section-header{display:flex;align-items:center;gap:1rem;margin-bottom:2.5rem}
+        .section-header .line{flex:1;height:1px;background:linear-gradient(90deg,var(--border-accent),transparent)}
+        .section-header h2{font-family:var(--font-display);font-size:2rem;font-weight:400;white-space:nowrap}
+        .section-header .line:first-child{background:linear-gradient(90deg,transparent,var(--border-accent))}
+        .abstract-text{font-size:1.02rem;color:var(--text-dim);line-height:1.9;max-width:850px;margin:0 auto;text-align:justify}
+        .abstract-text em{color:var(--accent);font-style:italic}
+        .fig-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;padding:1.5rem}
+        .fig-wrap.white-bg{background:#fff;padding:2rem}
+        .fig-wrap img{width:100%;border-radius:var(--radius-sm);display:block}
+        .fig-caption{margin-top:1.25rem;font-size:.88rem;color:var(--text-dim);line-height:1.7}
+        .fig-wrap.white-bg .fig-caption{color:#555}
+        .idea-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2rem}
+        .idea-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;transition:border-color .3s,transform .3s}
+        .idea-card:hover{border-color:var(--border-accent);transform:translateY(-3px)}
+        .idea-card .idea-icon{font-size:1.4rem;margin-bottom:.75rem}
+        .idea-card h3{font-size:.92rem;font-weight:600;margin-bottom:.5rem;color:var(--text)}
+        .idea-card p{font-size:.82rem;color:var(--text-dim);line-height:1.6}
+
+        /* ===== Demo Carousel ===== */
+        .demo-carousel{position:relative;max-width:900px;margin:0 auto}
+        .demo-track{overflow:hidden;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-card)}
+        .demo-slides{display:flex;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+        .demo-slide{min-width:100%;position:relative}
+        .demo-slide video{width:100%;display:block}
+        .demo-caption{padding:1rem 1.5rem;font-size:.88rem;color:var(--text-dim);border-top:1px solid var(--border);text-align:center;font-family:var(--font-mono);letter-spacing:-.01em}
+        .demo-caption strong{color:var(--text);font-weight:600;margin-right:.5rem}
+        .demo-nav-btn{position:absolute;top:50%;transform:translateY(calc(-50% - 1.5rem));z-index:5;width:48px;height:48px;border-radius:50%;border:1px solid var(--border);background:rgba(10,10,15,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s}
+        .demo-nav-btn:hover{background:var(--accent-glow);border-color:var(--border-accent);color:var(--accent);transform:translateY(calc(-50% - 1.5rem)) scale(1.08)}
+        .demo-nav-btn.prev{left:-24px}
+        .demo-nav-btn.next{right:-24px}
+        .demo-nav-btn:disabled{opacity:.25;pointer-events:none}
+        .demo-dots{display:flex;justify-content:center;gap:.5rem;margin-top:1rem}
+        .demo-dot{width:8px;height:8px;border-radius:50%;background:var(--text-muted);border:none;cursor:pointer;transition:all .25s;padding:0}
+        .demo-dot.active{background:var(--accent);transform:scale(1.3)}
+        .demo-counter{text-align:center;margin-top:.6rem;font-size:.78rem;color:var(--text-muted);font-weight:500;letter-spacing:.05em}
+        @media(max-width:960px){.demo-nav-btn.prev{left:8px}.demo-nav-btn.next{right:8px}}
+
+        .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-card)}
+        .table-title{padding:1.25rem 1.5rem .25rem;font-weight:600;font-size:.95rem;color:var(--text)}
+        .table-note{padding:.15rem 1.5rem .75rem;font-size:.76rem;color:var(--text-muted)}
+        table{width:100%;border-collapse:collapse;font-size:.85rem}
+        thead th{background:rgba(255,255,255,.03);padding:.75rem .85rem;text-align:left;font-weight:600;color:var(--text-dim);font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);white-space:nowrap}
+        thead th.group-header{text-align:center;border-bottom:1px solid var(--border-accent);font-size:.72rem;color:var(--accent);letter-spacing:.08em}
+        tbody td{padding:.65rem .85rem;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
+        tbody tr:last-child td{border-bottom:none}tbody tr:hover{background:rgba(255,255,255,.02)}
+        tbody tr.ours{background:var(--accent-glow)}tbody tr.ours td{font-weight:600}
+        td.best{color:var(--accent);font-weight:700}td.second-best{color:var(--accent2);text-decoration:underline;text-underline-offset:3px}
+        .tables-stack{display:flex;flex-direction:column;gap:2rem}
+        .bench-separator td{height:4px;padding:0;border:none;background:transparent}
+        .user-study-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:2rem}
+        .user-study-wrap h3{font-size:1rem;font-weight:600;margin-bottom:1.5rem}
+        .study-row{display:flex;align-items:center;gap:1rem;margin-bottom:.85rem}
+        .study-label{font-size:.8rem;color:var(--text-dim);width:110px;text-align:right;flex-shrink:0}
+        .study-bar-wrap{flex:1;display:flex;height:26px;border-radius:6px;overflow:hidden;font-size:.7rem;font-weight:600}
+        .bar-ours{background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center}
+        .bar-tie{background:rgba(255,255,255,.1);color:var(--text-dim);display:flex;align-items:center;justify-content:center}
+        .bar-other{background:rgba(255,255,255,.05);color:var(--text-muted);display:flex;align-items:center;justify-content:center}
+        .study-versus{margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border)}
+        .study-versus h4{font-size:.86rem;font-weight:600;margin-bottom:.85rem;color:var(--text-dim)}
+        .citation-block{position:relative;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem}
+        .citation-block pre{font-family:var(--font-mono);font-size:.8rem;line-height:1.7;color:var(--text-dim);overflow-x:auto;white-space:pre}
+        .copy-btn{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-dim);padding:.4rem .8rem;font-size:.78rem;font-family:var(--font-body);cursor:pointer;transition:all .2s}
+        .copy-btn:hover{background:var(--accent-glow);border-color:var(--border-accent);color:var(--accent)}
+        footer{text-align:center;padding:3rem 2rem;color:var(--text-muted);font-size:.82rem;border-top:1px solid var(--border)}footer a{color:var(--text-dim)}
+        @media(max-width:768px){.hero{padding-top:7rem}section{padding:3rem 0}.container{padding:0 1.25rem}.idea-grid{grid-template-columns:1fr}nav .nav-links{display:none}.demo-nav-btn.prev{left:8px}.demo-nav-btn.next{right:8px}}
+    
+        /* ===== Hero Video Grid ===== */
+        .hero-grid-bg{position:absolute;inset:0;z-index:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);gap:3px;overflow:hidden}
+        .hero-grid-bg video{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.7) saturate(.85)}
+        .hero-overlay{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at center,rgba(10,10,15,.55) 0%,rgba(10,10,15,.82) 70%,rgba(10,10,15,.95) 100%)}
+        .hero .container{position:relative;z-index:2}
+        .hero{position:relative;overflow:hidden;padding-top:8rem;padding-bottom:5rem;min-height:100vh;display:flex;align-items:center}
+
+    </style>
+</head>
+<body>
+<div class="ambient-bg"></div>
+
+<nav><div class="nav-inner"><a href="#" class="nav-title">Place-it-R1</a><div class="nav-links"><a href="#abstract">Abstract</a><a href="#method">Method</a><a href="#demos">Demos</a><a href="#results">Results</a><a href="#citation">Citation</a></div></div></nav>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+    <!-- 12-cell video grid background (4 cols x 3 rows) -->
+    <div class="hero-grid-bg">
+        <video autoplay loop muted playsinline><source src="assets/grid/mug_lake.mp4" type="video/mp4"></video>
+        <video autoplay loop muted playsinline><source src="assets/grid/iron_ball.mp4" type="video/mp4"></video>
+        <video autoplay loop muted playsinline><source src="assets/grid/dog_park.mp4" type="video/mp4"></video>
+        <video autoplay loop muted playsinline><source src="assets/grid/ball_bounce.mp4" type="video/mp4"></video>
+        <video autoplay loop muted playsinline><source src="assets/grid/hand_cup.mp4" type="video/mp4"></video>
+        <video autoplay loop muted playsinline><source src="assets/grid/slope_roll.mp4" type="video/mp4"></video>
+        <video autoplay loop muted playsinline><source src="assets/grid/donut_wave.mp4" type="video/mp4"></video>
+        <video autoplay loop muted playsinline><source src="assets/grid/glass_pour.mp4" type="video/mp4"></video>
+        <video autoplay loop muted playsinline><source src="assets/grid/box_fire.mp4" type="video/mp4"></video>
+    </div>
+    <div class="hero-overlay"></div>
+
+    <div class="container">
+        <div class="reveal"><div class="hero-badge"><span class="dot"></span></div></div>
+        <h1 class="reveal reveal-delay-1">Place-it-R1: Unlocking <em>Environment-aware Reasoning</em> Potential of MLLM for Video Object Insertion</h1>
+        <p class="subtitle reveal reveal-delay-2">A Think-then-Place paradigm that leverages MLLM chain-of-thought reasoning to orchestrate physically plausible and visually natural video object insertion.</p>
+
+        <div class="authors-section reveal reveal-delay-2">
+            <div class="authors-list">
+                <span class="author"><a href="#">Bohai Gu</a><sup>1,2</sup></span>
+                <span class="author"><a href="#">Taiyi Wu</a><sup>2</sup></span>
+                <span class="author"><a href="#">Dazhao Du</a><sup>1</sup></span>
+                <span class="author"><a href="#">Jian Liu</a><sup>1</sup></span>
+                <span class="author"><a href="#">Shuai Yang</a><sup>3</sup></span>
+                <span class="author"><a href="#">Xiaotong Zhao</a><sup>2</sup></span>
+                <span class="author"><a href="#">Alan Zhao</a><sup>2</sup></span>
+                <span class="author"><a href="#">Song Guo</a><sup>1†</sup></span>
+            </div>
+            <div class="affiliations"><span><sup>1</sup>HKUST</span><span><sup>2</sup>Tencent Video</span><span><sup>3</sup>Peking University</span></div>
+            <p class="author-note" style="margin-top:.5rem">† Corresponding author</p>
+        </div>
+
+        <div class="link-buttons reveal reveal-delay-3">
+            <a href="#" class="link-btn"><i class="fas fa-file-pdf"></i> Paper</a>
+            <a href="#" class="link-btn"><i class="fab fa-github"></i> Code</a>
+            <a href="#" class="link-btn"><i class="ai ai-arxiv"></i> arXiv</a>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== ABSTRACT ==================== -->
+<section id="abstract"><div class="container">
+    <div class="section-header reveal"><div class="line"></div><h2>Abstract</h2><div class="line"></div></div>
+    <p class="abstract-text reveal">Modern video editing techniques have achieved high visual fidelity when inserting video objects. However, they focus on optimizing visual fidelity rather than physical causality, leading to edits that are physically inconsistent with their environment. In this work, we present Place-it-R1, an end-to-end framework for video object insertion that unlocks the physical-aware reasoning potential of Multimodal Large Language Models (MLLMs). Our framework leverages the Chain-of-Thought (CoT) reasoning of MLLMs to orchestrate video diffusion, following a <em>Think-then-Place</em> paradigm. To bridge cognitive reasoning and generative execution, we introduce three key innovations: First, MLLM performs physical scene understanding and interaction reasoning, generating environment-aware chain-of-thought tokens and inferring valid insertion regions to explicitly guide the diffusion toward physically plausible insertion. Then, we introduce MLLM-guided Spatial Direct Preference Optimization (DPO), where diffusion outputs are fed back to the MLLM for scoring, enabling visual naturalness. During inference, the MLLM iteratively triggers refinement cycles and elicits adaptive adjustments from the diffusion model, forming a closed-loop that progressively enhances editing quality. Extensive experiments demonstrate Place-it-R1 achieves physically-coherent video object insertion compared with state-of-the-art solutions and commercial models.</p>
+</div></section>
+
+<!-- ==================== MOTIVATION ==================== -->
+<section id="motivation"><div class="container">
+    <div class="section-header reveal"><div class="line"></div><h2>Motivation</h2><div class="line"></div></div>
+    <div class="fig-wrap white-bg reveal">
+        <img src="assets/Motivation.png" alt="Place-it-R1 Motivation">
+        <div class="fig-caption"><strong>Figure 1.</strong> Place-it-R1 can handle environment-aware video object insertion with automatic spatial planning. <em>Top:</em> Hierarchical reasoning (Analysis → Revision → Planning) enables physically plausible insertion — e.g., inferring that a ceramic mug cannot float on water and generating a support structure. <em>Bottom:</em> Automatic trajectory generation predicts realistic physics trajectories including drops, rebounds, spins, and rolls.</div>
+    </div>
+</div></section>
+
+<!-- ==================== METHOD ==================== -->
+<section id="method"><div class="container">
+    <div class="section-header reveal"><div class="line"></div><h2>Method</h2><div class="line"></div></div>
+
+    <div class="idea-grid reveal">
+        <div class="idea-card"><div class="idea-icon">🧠→🤖</div><h3>Brain-to-Hand Command</h3><p>MLLM conducts hierarchical reasoning (Analysis → Revision → Planning) and generates environment-aware CoT tokens with automatic insertion trajectories to guide the diffusion model.</p></div>
+        <div class="idea-card"><div class="idea-icon">🤖→🧠</div><h3>Hand-to-Brain Feedback</h3><p>Diffusion outputs are scored by MLLM to construct DPO preference pairs. Spatial DPO applies fine-grained optimization within insertion regions for visual naturalness.</p></div>
+        <div class="idea-card"><div class="idea-icon">🔄</div><h3>Brain-Hand Co-refinement</h3><p>During inference, MLLM iteratively evaluates generation quality and triggers refinement cycles, forming a closed-loop that progressively enhances editing quality within 2–3 iterations.</p></div>
+    </div>
+
+    <div class="fig-wrap white-bg reveal">
+        <img src="assets/Framework.png" alt="Place-it-R1 Pipeline">
+        <div class="fig-caption"><strong>Figure 2. Overall pipeline of Place-it-R1.</strong> Stage 1 (Brain-to-Hand Command): MLLM performs hierarchical reasoning and automatic trajectory generation, then guides the diffusion model through semantic and spatial conditioning pathways via a connector module. Stage 2 (Hand-to-Brain Feedback): MLLM-guided physical preference dataset construction combined with Spatial DPO post-training (L<sub>total</sub> = λ<sub>global</sub>·L<sup>global</sup><sub>DPO</sub> + λ<sub>local</sub>·L<sup>local</sup><sub>DPO</sub>). Stage 3 (Brain-Hand Co-refinement): MLLM-guided iterative refinement cycles during inference.</div>
+    </div>
+</div></section>
+
+<!-- ==================== DEMOS ==================== -->
+<section id="demos"><div class="container">
+    <div class="section-header reveal"><div class="line"></div><h2>Demos</h2><div class="line"></div></div>
+
+    <div class="demo-carousel reveal" id="demoCarousel">
+        <div class="demo-track">
+            <div class="demo-slides" id="demoSlides">
+                <div class="demo-slide">
+                    <video autoplay loop muted playsinline><source src="assets/demos/Demo_1.mp4" type="video/mp4"></video>
+                    <div class="demo-caption"><strong>Demo 1</strong> Place the mug cup on lake surface</div>
+                </div>
+                <div class="demo-slide">
+                    <video autoplay loop muted playsinline><source src="assets/demos/Demo_2.mp4" type="video/mp4"></video>
+                    <div class="demo-caption"><strong>Demo 2</strong> Place the iron ball on the ground</div>
+                </div>
+                <div class="demo-slide">
+                    <video autoplay loop muted playsinline><source src="assets/demos/Demo_3.mp4" type="video/mp4"></video>
+                    <div class="demo-caption"><strong>Demo 3</strong> Let the woman hand on the cup</div>
+                </div>
+                <div class="demo-slide">
+                    <video autoplay loop muted playsinline><source src="assets/demos/Demo_4.mp4" type="video/mp4"></video>
+                    <div class="demo-caption"><strong>Demo 4</strong> Drop the ball from the top-left corner</div>
+                </div>
+                <div class="demo-slide">
+                    <video autoplay loop muted playsinline><source src="assets/demos/Demo_5.mp4" type="video/mp4"></video>
+                    <div class="demo-caption"><strong>Demo 5</strong> Drop the ball from the top of the slope</div>
+                </div>
+                <div class="demo-slide">
+                    <video autoplay loop muted playsinline><source src="assets/demos/Demo_6.mp4" type="video/mp4"></video>
+                    <div class="demo-caption"><strong>Demo 6</strong> Replace the cup with a glass</div>
+                </div>
+            </div>
+        </div>
+        <button class="demo-nav-btn prev" id="demoPrev" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+        <button class="demo-nav-btn next" id="demoNext" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+        <div class="demo-dots" id="demoDots"></div>
+        <div class="demo-counter" id="demoCounter">1 / 6</div>
+    </div>
+
+</div></section>
+
+<!-- ==================== RESULTS ==================== -->
+<section id="results"><div class="container">
+    <div class="section-header reveal"><div class="line"></div><h2>Results</h2><div class="line"></div></div>
+    <div class="tables-stack">
+
+        <!-- Table 1 — Updated -->
+        <div class="table-wrap reveal">
+            <div class="table-title">Table 1. Quantitative comparisons across three benchmarks</div>
+            <div class="table-note">PC: Physical Commonsense, PR: Physical Rule, PP: Physical Plausibility. UNIC benchmark includes many virtual animated characters as objects, thus precluding the use of PR.</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2">Benchmark</th>
+                        <th rowspan="2">Method</th>
+                        <th colspan="2" class="group-header" style="text-align:center;border-bottom:1px solid var(--border-accent)">Identity</th>
+                        <th colspan="2" class="group-header" style="text-align:center;border-bottom:1px solid var(--border-accent)">Video Quality</th>
+                        <th colspan="3" class="group-header" style="text-align:center;border-bottom:1px solid var(--border-accent)">Physics</th>
+                    </tr>
+                    <tr>
+                        <th>CLIP-I ↑</th><th>DINO-I ↑</th><th>Smooth. ↑</th><th>Aesth. ↑</th><th>PC ↑</th><th>PR ↑</th><th>PP ↑</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- UNIC -->
+                    <tr><td rowspan="6" style="vertical-align:middle;font-weight:600">UNIC</td>
+                        <td>UNIC</td><td>0.5980</td><td>0.2450</td><td>0.9610</td><td>0.5627</td><td>4.20</td><td>/</td><td>5.33</td></tr>
+                    <tr><td>Kling (commercial)</td><td class="second-best">0.6203</td><td>0.2509</td><td>0.9540</td><td>0.5641</td><td>4.41</td><td>/</td><td>5.93</td></tr>
+                    <tr><td>PIKA (commercial)</td><td class="best">0.6862</td><td class="best">0.3752</td><td class="best">0.9944</td><td class="best">0.6151</td><td>4.34</td><td>/</td><td>6.11</td></tr>
+                    <tr><td>Lucy-edit pro (commercial)</td><td>0.6021</td><td>0.2629</td><td>0.9865</td><td>0.5693</td><td>4.28</td><td>/</td><td>5.79</td></tr>
+                    <tr class="ours"><td>Place-it-R1 (standard)</td><td>0.6043</td><td class="second-best">0.2897</td><td class="second-best">0.9928</td><td>0.5684</td><td class="second-best">4.53</td><td>/</td><td class="second-best">6.21</td></tr>
+                    <tr class="ours"><td>Place-it-R1 (flexible)</td><td>0.6040</td><td>0.2895</td><td>0.9919</td><td class="second-best">0.5787</td><td class="best">4.60</td><td>/</td><td class="best">6.63</td></tr>
+
+                    <tr class="bench-separator"><td colspan="9"></td></tr>
+
+                    <!-- FlexInsert -->
+                    <tr><td rowspan="4" style="vertical-align:middle;font-weight:600">FlexInsert</td>
+                        <td>AnyV2V + Anydoor</td><td>0.7853</td><td>0.3805</td><td>0.9853</td><td>0.4833</td><td>3.87</td><td>0.66</td><td>3.38</td></tr>
+                    <tr><td>VACE + Traj (w/o CoT)</td><td>0.7285</td><td>0.2541</td><td class="second-best">0.9913</td><td>0.4920</td><td>4.03</td><td>0.67</td><td>5.21</td></tr>
+                    <tr class="ours"><td>Place-it-R1 (standard)</td><td class="best">0.7941</td><td class="second-best">0.4917</td><td class="best">0.9918</td><td class="second-best">0.5294</td><td class="second-best">4.13</td><td class="second-best">0.78</td><td class="second-best">7.28</td></tr>
+                    <tr class="ours"><td>Place-it-R1 (flexible)</td><td class="second-best">0.7938</td><td class="best">0.4925</td><td>0.9906</td><td class="best">0.5305</td><td class="best">4.17</td><td class="best">0.86</td><td class="best">7.93</td></tr>
+
+                    <tr class="bench-separator"><td colspan="9"></td></tr>
+
+                    <!-- HumanSync -->
+                    <tr><td rowspan="3" style="vertical-align:middle;font-weight:600">HumanSync</td>
+                        <td>VACE</td><td>0.7553</td><td>0.4210</td><td>0.9908</td><td>0.4952</td><td>4.12</td><td class="second-best">0.91</td><td>6.21</td></tr>
+                    <tr class="ours"><td>Place-it-R1 (standard)</td><td class="second-best">0.7631</td><td class="second-best">0.4497</td><td class="best">0.9929</td><td class="second-best">0.5283</td><td class="second-best">4.33</td><td class="best">0.92</td><td class="second-best">6.58</td></tr>
+                    <tr class="ours"><td>Place-it-R1 (flexible)</td><td class="best">0.7632</td><td class="best">0.4500</td><td class="second-best">0.9926</td><td class="best">0.5295</td><td class="best">4.37</td><td class="best">0.92</td><td class="best">6.93</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- User Study -->
+        <div class="user-study-wrap reveal">
+            <h3>User Study on FlexInsert</h3>
+            <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:1.25rem">Three-way preference selection by 10 independent annotators.</p>
+            <div class="study-row"><div class="study-label">Phys. Plausible</div><div class="study-bar-wrap"><div class="bar-ours" style="width:56.1%">Place-it-R1 56.1%</div><div class="bar-other" style="width:20.5%">AnyV2V 20.5%</div><div class="bar-other" style="width:23.4%">VACE 23.4%</div></div></div>
+            <div class="study-row"><div class="study-label">Visual Quality</div><div class="study-bar-wrap"><div class="bar-ours" style="width:39%">Place-it-R1 39.0%</div><div class="bar-other" style="width:26.6%">AnyV2V 26.6%</div><div class="bar-other" style="width:34.4%">VACE 34.4%</div></div></div>
+            <div class="study-versus"><h4>1v1: Place-it-R1 vs VACE</h4>
+                <div class="study-row"><div class="study-label">Phys. Plausible</div><div class="study-bar-wrap"><div class="bar-ours" style="width:52.38%">Ours 52.4%</div><div class="bar-tie" style="width:35.12%">Tie 35.1%</div><div class="bar-other" style="width:12.50%">VACE 12.5%</div></div></div>
+                <div class="study-row"><div class="study-label">Visual Quality</div><div class="study-bar-wrap"><div class="bar-ours" style="width:55.21%">Ours 55.2%</div><div class="bar-tie" style="width:37.50%">Tie 37.5%</div><div class="bar-other" style="width:7.29%">VACE 7.3%</div></div></div>
+                <h4 style="margin-top:1rem">1v1: Place-it-R1 vs AnyV2V</h4>
+                <div class="study-row"><div class="study-label">Phys. Plausible</div><div class="study-bar-wrap"><div class="bar-ours" style="width:42.54%">Ours 42.5%</div><div class="bar-tie" style="width:30.38%">Tie 30.4%</div><div class="bar-other" style="width:27.08%">AnyV2V 27.1%</div></div></div>
+                <div class="study-row"><div class="study-label">Visual Quality</div><div class="study-bar-wrap"><div class="bar-ours" style="width:48.96%">Ours 49.0%</div><div class="bar-tie" style="width:21.88%">Tie 21.9%</div><div class="bar-other" style="width:29.17%">AnyV2V 29.2%</div></div></div>
+            </div>
+        </div>
+
+    </div>
+</div></section>
+
+<!-- ==================== CITATION ==================== -->
+<section id="citation"><div class="container">
+    <div class="section-header reveal"><div class="line"></div><h2>Citation</h2><div class="line"></div></div>
+    <div class="citation-block reveal">
+        <button class="copy-btn" onclick="copyBib()"><i class="fas fa-copy"></i> Copy</button>
+        <pre id="bibtex">@inproceedings{gu2026placeitr1,
+    title={Place-it-R1: Unlocking Environment-aware Reasoning
+           Potential of MLLM for Video Object Insertion},
+    author={Gu, Bohai and Wu, Taiyi and Du, Dazhao and Yang, Shuai
+            and Zhao, Xiaotong and Zhao, Alan and Guo, Song},
+    booktitle={Proceedings of the IEEE/CVF Conference on Computer
+               Vision and Pattern Recognition (CVPR)},
+    year={2026}
+}</pre>
+    </div>
+</div></section>
+
+<footer><p>© 2026 Place-it-R1 &nbsp;|&nbsp; Website template inspired by <a href="https://yangzhou24.github.io/OmniWorld/" target="_blank">OmniWorld</a></p></footer>
+
+<script>
+const observer=new IntersectionObserver(e=>{e.forEach(e=>{e.isIntersecting&&e.target.classList.add('visible')})},{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(e=>observer.observe(e));
+function copyBib(){const t=document.getElementById('bibtex').textContent;navigator.clipboard.writeText(t).then(()=>{const b=document.querySelector('.copy-btn');b.innerHTML='<i class="fas fa-check"></i> Copied!';setTimeout(()=>{b.innerHTML='<i class="fas fa-copy"></i> Copy'},2000)})}
+let lastScroll=0;const nav=document.querySelector('nav');window.addEventListener('scroll',()=>{const c=window.scrollY;nav.style.transform=c>lastScroll&&c>100?'translateY(-100%)':'translateY(0)';lastScroll=c},{passive:true});
+
+/* Demo Carousel */
+let currentSlide=0;
+const slides=document.querySelectorAll('.demo-slide');
+const totalSlides=slides.length;
+const slidesEl=document.getElementById('demoSlides');
+const dotsEl=document.getElementById('demoDots');
+const counterEl=document.getElementById('demoCounter');
+const prevBtn=document.getElementById('demoPrev');
+const nextBtn=document.getElementById('demoNext');
+
+// Create dots
+for(let i=0;i<totalSlides;i++){const dot=document.createElement('button');dot.className='demo-dot'+(i===0?' active':'');dot.onclick=()=>goToSlide(i);dotsEl.appendChild(dot)}
+
+function goToSlide(n){
+    currentSlide=n;
+    slidesEl.style.transform='translateX(-'+currentSlide*100+'%)';
+    counterEl.textContent=(currentSlide+1)+' / '+totalSlides;
+    dotsEl.querySelectorAll('.demo-dot').forEach((d,i)=>d.classList.toggle('active',i===currentSlide));
+    prevBtn.disabled=currentSlide===0;
+    nextBtn.disabled=currentSlide===totalSlides-1;
+    // Pause all videos, play current
+    slides.forEach((s,i)=>{const v=s.querySelector('video');if(v){if(i===currentSlide){v.currentTime=0;v.play()}else{v.pause()}}});
+}
+function changeSlide(dir){goToSlide(Math.max(0,Math.min(totalSlides-1,currentSlide+dir)))}
+goToSlide(0);
+
+// Keyboard support
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')changeSlide(-1);if(e.key==='ArrowRight')changeSlide(1)});
+</script>
+</body>
+</html>
